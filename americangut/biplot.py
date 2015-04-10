@@ -106,10 +106,10 @@ def plot_contour(fig, ax,
     return fig, ax
 
 
-def make_biplot(samp_df,feat_df,
-                num_genera,
+def make_biplot(samp_df,
+                feat_df,
                 metavar,
-                eigvals
+                eigvals,
                 otu_var="phylum",
                 spread="scatter",
                 alpha=0.75,
@@ -138,7 +138,7 @@ def make_biplot(samp_df,feat_df,
     i=0
     recs=[]
     phyla = []
-
+    num_features = len(feat_df.index)
     for name, group in feat_df.groupby(otu_var):
         #name = otu.split(';')[1].replace(' ','')
         if name in otu_cmap:
@@ -154,7 +154,7 @@ def make_biplot(samp_df,feat_df,
             theta = np.asscalar(feat_df.loc[otu]['degrees'])
 
             plt.arrow(0, 0, a, b, color=c,
-                      width=0.02, head_width=0.05, zorder=num_genera)
+                      width=0.02, head_width=0.05, zorder=num_features)
             #plt.text(a, b, genus, color='k', ha='center', va='center')
         if phylum not in phyla:
             recs.append(mpatches.Rectangle((0,0),1,1,fc=c))
