@@ -17,14 +17,15 @@ def plot_scatter(fig, ax,
                  alpha=0.75,
                  zorder_dict=None,
                  sample_cmap=None,
+                 sample_order=None,
                  sample_legend=1):
     """
     fig : matplotlib.fig
     ax : matplotlib.Axes
-
     """
     i=0
-    if len(set(samp_df[metavar])) < 10:
+    if samp_df[metavar].dtype == np.dtype('O'):
+
         for name, group in samp_df.groupby(metavar):
             if zorder_dict != None:
                 z = zorder_dict[name]
@@ -40,8 +41,15 @@ def plot_scatter(fig, ax,
                         marker='o', linestyle='', ms=8,
                         label=name, alpha=alpha, zorder=z)
         i+=1
-        ax.legend(title=metavar, loc=sample_legend)
 
+        ax.legend(title=metavar, loc=sample_legend)
+        if sample_order is not None:
+            handles, labels = ax.get_legend_handles_labels()
+            handle_order = {x[0]:x[1] for x in zip(handles, labels) }
+            sort_order = {sample_order[i]:i for i in range(len(sample_order))}
+            labels.sort(key=lambda x: sort_order[x])
+            handles.sort(key=lambda x: sort_order[handle_order[x]])
+            ax.legend(handles, labels, loc=sample_legend)
     else:
         cNorm = matplotlib.colors.Normalize(vmin=min(samp_df[metavar]), vmax=max(samp_df[metavar]))
         scalarMap = cmx.ScalarMappable(norm=cNorm, cmap='seismic')
@@ -60,6 +68,7 @@ def plot_contour(fig, ax,
                  metavar,
                  alpha=0.75,
                  zorder_dict=None,
+                 sample_order=None,
                  sample_cmap=None,
                  sample_legend=1):
     lines, labels = [], []
@@ -103,6 +112,13 @@ def plot_contour(fig, ax,
             continue
 
     ax.legend(lines, labels, title=metavar, loc=sample_legend)
+    if sample_order is not None:
+        handles, labels = ax.get_legend_handles_labels()
+        handle_order = {x[0]:x[1] for x in zip(handles, labels) }
+        sort_order = {sample_order[i]:i for i in range(len(sample_order))}
+        labels.sort(key=lambda x: sort_order[x])
+        handles.sort(key=lambda x: sort_order[handle_order[x]])
+        ax.legend(handles, labels, loc=sample_legend)
     return fig, ax
 
 
@@ -114,6 +130,7 @@ def make_biplot(samp_df,
                 spread="scatter",
                 alpha=0.75,
                 zorder_dict=None,
+                sample_order=None,
                 sample_cmap=None,
                 otu_cmap=None,
                 sample_legend=1,
@@ -166,6 +183,7 @@ def make_biplot(samp_df,
                                    samp_df,
                                    metavar,
                                    alpha=alpha,
+                                   sample_order=sample_order,
                                    zorder_dict=zorder_dict,
                                    sample_cmap=sample_cmap,
                                    sample_legend=sample_legend)
@@ -174,11 +192,12 @@ def make_biplot(samp_df,
                                    samp_df,
                                    metavar,
                                    alpha=alpha,
+                                   sample_order=sample_order,
                                    zorder_dict=zorder_dict,
                                    sample_cmap=sample_cmap,
                                    sample_legend=sample_legend)
-
-    if len(set(samp_df[metavar])) < 10:
+    #If its a categorical variable
+    if samp_df[metavar].dtype == np.dtype('O'):
         plt.gca().add_artist(l1)
     # Create some padding
     xmin = min([min(samp_df['PCA1']), min(feat_df['PCA1'])])
